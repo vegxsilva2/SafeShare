@@ -1,10 +1,10 @@
-# ShareSafe
+# SafeShare
 
 **Inspect. Sanitize. Verify. Share with confidence.**
 
-ShareSafe is an open-source, privacy-focused desktop application designed to help users identify and remove sensitive metadata from files before sharing them.
+SafeShare is an open-source, privacy-focused desktop application designed to help users identify and remove sensitive metadata from files before sharing them.
 
-Instead of blindly removing metadata, ShareSafe aims to provide a transparent workflow: inspect a file, understand what information it may reveal, generate a sanitized copy, and verify the result through a second analysis.
+Instead of blindly removing metadata, SafeShare aims to provide a transparent workflow: inspect a file, understand what information it may reveal, generate a sanitized copy, and verify the result through a second analysis.
 
 The goal is simple: make digital privacy accessible to everyone, without requiring technical knowledge or uploading personal files to external services.
 
@@ -20,7 +20,7 @@ This information can unintentionally disclose personal details, reveal a user's 
 
 Existing metadata removal tools address part of this problem, but users may still struggle to understand what was exposed, what was removed, and what information remains.
 
-ShareSafe aims to make this process transparent and verifiable.
+SafeShare aims to make this process transparent and verifiable.
 
 ## Key Features
 
@@ -47,7 +47,7 @@ Generate a sanitized copy of the original file by removing supported metadata.
 
 ### 3. Post-Sanitization Verification
 
-ShareSafe is designed to analyze the sanitized output again instead of assuming that the removal process was successful.
+SafeShare is designed to analyze the sanitized output again instead of assuming that the removal process was successful.
 
 The verification report will distinguish between:
 
@@ -106,10 +106,10 @@ The original file remains untouched unless the user explicitly chooses otherwise
 
 ## Architecture
 
-ShareSafe is planned as a modular application with independent components for analysis, sanitization, and verification.
+SafeShare is planned as a modular application with independent components for analysis, sanitization, and verification.
 
 ```text
-ShareSafe
+SafeShare
 ├── User Interface
 │   ├── File Selection
 │   ├── Privacy Findings
@@ -145,7 +145,7 @@ Dependencies will be evaluated for security, maintenance status, compatibility, 
 
 ## Security and Privacy Principles
 
-ShareSafe is intended to follow a privacy-first development approach.
+SafeShare is intended to follow a privacy-first development approach.
 
 * **Data minimization:** Process only the information necessary for the requested operation.
 * **Local-first operation:** Avoid transferring user files to external services.
@@ -154,7 +154,7 @@ ShareSafe is intended to follow a privacy-first development approach.
 * **Transparent results:** Never claim complete privacy when the tool cannot verify it.
 * **Testable guarantees:** Validate sanitization behavior using automated tests and deliberately crafted sample files.
 
-ShareSafe does not aim to replace digital forensics, comprehensive document inspection, or professional security assessments.
+SafeShare does not aim to replace digital forensics, comprehensive document inspection, or professional security assessments.
 
 ## Roadmap
 
@@ -206,7 +206,7 @@ The final repository should include the selected license and appropriate notices
 
 ## Disclaimer
 
-ShareSafe is a privacy-enhancement tool, not a guarantee of anonymity.
+SafeShare is a privacy-enhancement tool, not a guarantee of anonymity.
 
 Removing metadata does not necessarily remove identifying information visible in the file's content. For example, an image may still contain a recognizable face, a document may reveal confidential information in its text, and a PDF may contain embedded objects or other structures outside the current inspection scope.
 
@@ -214,4 +214,4 @@ Always review the verification report before sharing sensitive files.
 
 ---
 
-**ShareSafe — Make privacy visible before you share.**
+**SafeShare — Make privacy visible before you share.**
