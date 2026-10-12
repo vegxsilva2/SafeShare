@@ -58,7 +58,8 @@ python -m unittest discover -s tests -v
 
 - The initial version targets JPEG files only.
 - Sanitization removes JPEG APP0–APP15 segments and COM segments from the JPEG marker stream. This is intentionally conservative and may remove useful non-private metadata or application-specific information.
-- JPEG files with malformed or unsupported structures may be rejected rather than modified.
+- JPEG files with malformed marker sequences, truncated segments, invalid lengths, missing EOI markers, or trailing data are rejected before a sanitized output is created.
+- JPEG files with otherwise unsupported structures may also be rejected rather than modified.
 - Verification reports the metadata classes and EXIF tags this version can parse. It is not proof that the image content itself contains no identifying information.
 - The application does not currently perform face/plate detection, OCR, or visual-content anonymization.
 

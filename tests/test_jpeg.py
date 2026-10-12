@@ -82,6 +82,32 @@ class JPEGTests(unittest.TestCase):
             sanitize_jpeg(source, output)
         self.assertFalse(output.exists())
 
+    def test_inspection_and_sanitization_reject_malformed_marker_streams(self):
+        malformed = {
+            "incomplete marker": b"\xff\xd8\xff\xe1\x00\x02\xff",
+            "truncated length field": b"\xff\xd8\xff\xe1\x00",
+            "length below minimum": b"\xff\xd8\xff\xe1\x00\x01\xff\xd9",
+            "length exceeds available bytes": b"\xff\xd8\xff\xe1\x00\x06x",
+            "undersized scan header": b"\xff\xd8\xff\xda\x00\x02\xff\xd9",
+            "undersized frame header": b"\xff\xd8\xff\xc0\x00\x02\xff\xd9",
+            "unexpected SOI": b"\xff\xd8\xff\xd8\xff\xd9",
+            "restart marker outside scan": b"\xff\xd8\xff\xd0\xff\xd9",
+            "stuffed byte outside scan": b"\xff\xd8\xff\x00\xff\xd9",
+            "fill byte before stuffed byte": b"\xff\xd8\xff\xda\x00\x08\x01\x01\x00\x00\x3f\x00\xff\xff\x00\xff\xd9",
+            "trailing data after EOI": b"\xff\xd8\xff\xd9unexpected",
+        }
+        for name, data in malformed.items():
+            with self.subTest(name=name):
+                source = self.root / f"{name.replace(' ', '_')}.jpg"
+                output = self.root / f"{name.replace(' ', '_')}_clean.jpg"
+                source.write_bytes(data)
+
+                with self.assertRaises(JPEGFormatError):
+                    inspect_jpeg(source)
+                with self.assertRaises(JPEGFormatError):
+                    sanitize_jpeg(source, output)
+                self.assertFalse(output.exists())
+
     def test_refuses_overwrite(self):
         source = self.root / "input.jpg"
         output = self.root / "output.jpg"

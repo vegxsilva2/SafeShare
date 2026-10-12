@@ -98,7 +98,7 @@ def _marker_name(code: int) -> str:
 
 def _iter_markers(data: bytes):
     """Yield marker segments from a JPEG, including markers between scans."""
-    if len(data) < 4 or data[:2] != b"\xff\xd8":
+    if len(data) < 2 or data[:2] != b"\xff\xd8":
         raise JPEGFormatError("File does not start with the JPEG SOI marker.")
 
     pos = 2
@@ -114,21 +114,40 @@ def _iter_markers(data: bytes):
         code = data[pos]
         pos += 1
 
-        # SOI, EOI, TEM and restart markers have no length field.
-        if code in (0xD8, 0xD9, 0x01) or 0xD0 <= code <= 0xD7:
+        if code == 0x00:
+            raise JPEGFormatError("Stuffed JPEG byte found outside image data.")
+        if code == 0xD8:
+            raise JPEGFormatError("Unexpected JPEG SOI marker.")
+        if 0xD0 <= code <= 0xD7:
+            raise JPEGFormatError("JPEG restart marker found outside image data.")
+
+        # EOI and TEM have no length field. Restart markers are handled only
+        # while scanning entropy-coded image data.
+        if code in (0xD9, 0x01):
             yield Marker(code, start, pos, b"")
             if code == 0xD9:
+                if pos != size:
+                    raise JPEGFormatError("Unexpected data after the JPEG EOI marker.")
                 return
             continue
 
         if pos + 2 > size:
             raise JPEGFormatError("Truncated JPEG segment length.")
         length = int.from_bytes(data[pos:pos + 2], "big")
-        if length < 2 or pos + length > size:
-            raise JPEGFormatError("Invalid or truncated JPEG segment.")
+        if length < 2:
+            raise JPEGFormatError("Invalid JPEG segment length (minimum is 2 bytes).")
+        if pos + length > size:
+            raise JPEGFormatError("Truncated JPEG segment payload.")
         payload_start = pos + 2
         segment_end = pos + length
         payload = data[payload_start:segment_end]
+        if code == 0xDA:
+            if length < 8 or payload[0] == 0 or length != 6 + 2 * payload[0]:
+                raise JPEGFormatError("Invalid or truncated JPEG scan header.")
+        elif code in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
+                      0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            if length < 11 or payload[5] == 0 or length != 8 + 3 * payload[5]:
+                raise JPEGFormatError("Invalid or truncated JPEG frame header.")
         yield Marker(code, start, segment_end, payload)
         pos = segment_end
 
@@ -143,8 +162,15 @@ def _iter_markers(data: bytes):
                 if cursor >= size:
                     raise JPEGFormatError("Truncated marker in JPEG scan.")
                 next_code = data[cursor]
-                # FF00 is a stuffed data byte; restart markers are scan data.
-                if next_code == 0x00 or 0xD0 <= next_code <= 0xD7:
+                fill_count = cursor - marker_start - 1
+                if next_code == 0x00:
+                    if fill_count:
+                        raise JPEGFormatError("Unexpected JPEG fill byte in image data.")
+                    pos = cursor + 1
+                    continue
+                # Restart markers belong to the entropy-coded scan, not to
+                # the outer marker stream.
+                if 0xD0 <= next_code <= 0xD7:
                     pos = cursor + 1
                     continue
                 pos = marker_start
@@ -337,6 +363,8 @@ def sanitize_jpeg(source: str | Path, destination: str | Path) -> Inspection:
         raise ValueError("The output path must differ from the original file.")
 
     data = src.read_bytes()
+    # Fully validate the source before creating any output path or file.
+    list(_iter_markers(data))
     chunks = [data[:2]]
     last_end = 2
     removed = 0
