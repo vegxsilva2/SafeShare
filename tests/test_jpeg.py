@@ -61,6 +61,27 @@ class JPEGTests(unittest.TestCase):
         with self.assertRaises(JPEGFormatError):
             inspect_jpeg(source)
 
+    def test_rejects_jpeg_missing_eoi(self):
+        source = self.root / "missing_eoi.jpg"
+        source.write_bytes(b"\xff\xd8" + segment(0xDB, b"\x00"))
+
+        with self.assertRaisesRegex(JPEGFormatError, "EOI"):
+            inspect_jpeg(source)
+
+    def test_eoi_bytes_inside_segment_payload_do_not_validate_file(self):
+        source = self.root / "fake_eoi.jpg"
+        output = self.root / "sanitized.jpg"
+        # The FF D9 sequence is payload data, not a JPEG marker, because the
+        # APP segment length explicitly includes it. There is no real EOI.
+        data = b"\xff\xd8" + segment(0xE1, b"payload\xff\xd9still-payload")
+        source.write_bytes(data)
+
+        with self.assertRaisesRegex(JPEGFormatError, "EOI"):
+            inspect_jpeg(source)
+        with self.assertRaisesRegex(JPEGFormatError, "EOI"):
+            sanitize_jpeg(source, output)
+        self.assertFalse(output.exists())
+
     def test_refuses_overwrite(self):
         source = self.root / "input.jpg"
         output = self.root / "output.jpg"

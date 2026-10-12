@@ -150,6 +150,10 @@ def _iter_markers(data: bytes):
                 pos = marker_start
                 break
 
+    # Reaching EOF is not equivalent to finding the JPEG End Of Image marker.
+    # In particular, FF D9 bytes inside a length-delimited payload must not count.
+    raise JPEGFormatError("JPEG is missing the EOI marker.")
+
 
 def _read_exif_tags(payload: bytes) -> tuple[list[str], list[str], list[str]]:
     """Parse EXIF directory entries; values are bounded and rendered for local review."""
