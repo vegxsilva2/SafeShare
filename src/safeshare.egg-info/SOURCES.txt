@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+src/safeshare/__init__.py
+src/safeshare/__main__.py
+src/safeshare/jpeg.py
+src/safeshare.egg-info/PKG-INFO
+src/safeshare.egg-info/SOURCES.txt
+src/safeshare.egg-info/dependency_links.txt
+src/safeshare.egg-info/requires.txt
+src/safeshare.egg-info/top_level.txt
+src/safeshare/ui/__init__.py
+src/safeshare/ui/app.py
+tests/test_jpeg.py
