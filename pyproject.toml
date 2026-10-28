@@ -4,14 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "safeshare"
-version = "0.1.0"
-description = "Local-first JPEG metadata inspection and sanitization"
+version = "0.2.0"
+description = "Local-first JPEG metadata inspection, sanitization and verification"
 readme = "README.md"
-requires-python = "==3.12.*"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
 dependencies = [
     "customtkinter==5.2.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/vegxsilva2/SafeShare"
+
+[project.scripts]
+safeshare = "safeshare.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
